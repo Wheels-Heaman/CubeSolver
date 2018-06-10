@@ -19,6 +19,8 @@ from webcamFive import createRects, drawRects, calculateAverages, drawColors, ca
 # Variable Constants 
 PrintScramble = True 
 PrintSolve = True 
+DemoMode = True # Use if you don't have your own cube 
+CameraNumber = 0 
 NoOfSolves = 10 # Number of Solves Per Test 
 ScrambleSpeed = 4 # No of Steps to Break 90 Degree Rotation (Greatly Effects Running Speed)...
 SolveSpeed = 4 # Set Speed Value to 0 to Not Render Rotations 
@@ -1107,7 +1109,8 @@ class InteractiveCube(plt.Axes):
          
             self.rotateFaceInternal(event.key.upper(), direction)
             self.rotateFaceRendered(event.key.upper(), direction)
-
+        elif event.key.upper() == "A":
+            self.scramble()
         elif event.key.upper() == "S":
             self.initSolve()
         elif event.key.upper() == "T":
@@ -1141,7 +1144,7 @@ class InteractiveCube(plt.Axes):
         elif event.key.upper() == "W":
             self.resetView()
 
-            cap = cv2.VideoCapture(0)
+            cap = cv2.VideoCapture(CameraNumber)
 
             TopLeft = 100, 50
             CubieSize = 200
@@ -1155,7 +1158,7 @@ class InteractiveCube(plt.Axes):
             WhiteWebcam = 255, 255, 255
 
             colorsBGR = [YellowWebcam, BlueWebcam, RedWebcam, GreenWebcam, OrangeWebcam, WhiteWebcam]
-            colorsHSV = [[32.472000000000001, 130.02789999999999, 132.6181], [99.032300000000021, 253.08519999999993, 98.488299999999967], [163.90259999999998, 172.25290000000001, 100.36470000000001], [79.078999999999965, 231.85559999999998, 103.97680000000003], [9.111100000000004, 150.35169999999999, 147.09540000000004], [58.559900000000013, 27.716800000000003, 151.86929999999998]]
+            colorsHSV = [[26.159300000000002, 114.65090000000008, 114.3373], [102.20989999999998, 170.32320000000004, 76.107300000000009], [171.25239999999997, 150.37210000000002, 70.242299999999972], [68.361499999999978, 113.70349999999996, 80.432000000000031], [163.27959999999996, 163.37390000000002, 131.10299999999995], [54.942199999999985, 11.840499999999999, 98.711799999999997]]
 
             colorNames = ["Yellow", "Blue", "Red", "Green", "Orange", "White"]
 
@@ -1166,8 +1169,15 @@ class InteractiveCube(plt.Axes):
             squareColor = None
             colorsArray = None
             newColors = []
+            inDemoMode = False 
             while True:
-                _, frame = cap.read()
+                if inDemoMode:
+                    frame = cv2.imread("exampleImages/exampleImage%s.png" %(faceIndex + 1))
+                    if faceIndex > 5:
+                        _, frame = cap.read()
+
+                else:
+                    _, frame = cap.read()
                 hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
                 drawRects(frame, NoOfStickersPerFace, rects, sampleRects, WhiteWebcam)
                 drawColors(colorsArray, frame, colorsBGR, NoOfStickersPerFace, sampleRects)
@@ -1204,7 +1214,8 @@ class InteractiveCube(plt.Axes):
                         for sticker in self.stickerDict:
                             self.stickerDict[sticker] = Black
                             self.drawCube()
-
+                        if DemoMode:
+                            inDemoMode = True 
                     else:
                         if faceIndex < 6:
                             colorsArrayCorrected = self.correctDetectedColors(colorsArray)
@@ -1217,9 +1228,12 @@ class InteractiveCube(plt.Axes):
                             self.cubeStateDict = dict(self.stickerDict)
                             calculating = False
                             calibrating = False
+                            inDemoMode = False 
                             break
         
             self.drawCube()
+
+        self.drawCube()
 
     # Sets Key State to False
     def keyRelease(self, event):

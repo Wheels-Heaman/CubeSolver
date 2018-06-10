@@ -53,6 +53,8 @@ def drawRects(frame, NoOfStickersPerFace, rects, sampleRects, WhiteWebcam):
 	for x in range(NoOfStickersPerFace):
 		cv2.rectangle(frame, rects[x][0], rects[x][1], WhiteWebcam, 2)
 		cv2.rectangle(frame, sampleRects[x][0], sampleRects[x][1], WhiteWebcam, 2)
+
+	return frame
 	
 
 def calculateAverages(hsv, NoOfStickersPerFace, sampleRects, colorsHSV):
